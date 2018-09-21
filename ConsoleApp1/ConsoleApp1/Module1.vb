@@ -2,40 +2,41 @@
 
     Sub Main()
 
-        Dim r, h As Integer
-        Dim S, V As Double
-        Dim k As String
+        Dim h, black, white As Integer
 
-        Console.WriteLine("Radius: ")
-        r = CInt(Console.ReadLine())
+        h = Console.ReadLine()
+        white = 1
+        black = h - 1
 
-        Console.WriteLine("Do you want to calclate example 2? (y/n)")
-        k = CStr(Console.ReadLine())
+        For i = 1 To h
 
-        If k = "y" Then
+            For l = 1 To black
 
-            Console.WriteLine("Height: ")
-            h = CInt(Console.ReadLine())
+                WL(" ")
 
-        End If
+            Next
 
-        If h = 0 Then
+            For l = 1 To white
 
-            S = 2 * Math.PI * r * r
-            Console.WriteLine("Area: " & S)
+                WL("#")
 
-        Else
+            Next
 
-            S = (2 * Math.PI * r * r) + (2 * Math.PI * r * h)
-            Console.WriteLine("Area: " & S)
+            white += 2
+            black -= 1
 
-            V = Math.PI * r * r * h
-            Console.WriteLine("Volme: " & V)
+            Console.WriteLine()
 
-        End If
+        Next
 
-        MsgBox("lol?")
+        MsgBox("k?")
 
     End Sub
+
+    Function WL(ByVal succ As String)
+
+        Console.Write(succ)
+
+    End Function
 
 End Module
