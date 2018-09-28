@@ -2,6 +2,8 @@
 
     Sub Main()
 
+        Dim random As New Random
+
         Dim h, black, white As Integer
 
         h = Console.ReadLine()
@@ -18,7 +20,7 @@
 
             For l = 1 To white
 
-                WL("#")
+                WL(random.Next Mod 10)
 
             Next
 

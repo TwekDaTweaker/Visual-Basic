@@ -4,7 +4,15 @@
 
         Randomize()
 
+        Dim a As String
 
+        While True
+
+            a = Console.ReadLine
+
+            Console.WriteLine("wrong")
+
+        End While
 
         MsgBox("k?")
 
