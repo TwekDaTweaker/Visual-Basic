@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{72234B36-695C-477B-AC6D-4D88F7D36D29}</ProjectGuid>
+    <ProjectGuid>{5E4EDF8D-F85F-4EBD-A281-C041BC9C4C7B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <StartupObject>ConsoleAppTBAG.Module1</StartupObject>
     <RootNamespace>ConsoleAppTBAG</RootNamespace>
