@@ -2,10 +2,6 @@
 
     Dim rand As New Random
     Dim a As Boolean
-    Dim gold As Integer = 20
-    Dim hp As Integer = 100
-    Dim acc As Integer = 0
-    Dim dmg As Integer = 0
 
     Sub Main()
 
@@ -34,7 +30,7 @@
             print("<< You try to talk to them to see if you can get any information about this town", False)
             print("   that you miraculously appeared in.")
 
-            If success(1) Then
+            If success(50) Then
 
                 print("<< They appear to be drunk and let you in on the conversation.")
                 print("", False)
@@ -204,6 +200,8 @@
             Return False
 
         Loop
+
+        Return False
 
     End Function
 
