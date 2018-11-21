@@ -30,9 +30,9 @@
 
     Sub Main()
 
-        Dim house As Vec2
-        Dim DogPos As Vec2
-        Dim CatchPos As Vec2
+        Dim house As New Vec2(0, 0)
+        Dim DogPos As New Vec2(0, 0)
+        Dim CatchPos As New Vec2(0, 0)
 
         While True
 
@@ -40,23 +40,31 @@
 
             While True
 
-                Dim caught As Boolean = False
+                Dim caught As Integer = 0
+                ' 0 - null; 1 - lost; 2 - won;
 
                 UpdateDogPos(DogPos)
                 UpdateCatchPos(DogPos, CatchPos, caught)
 
-                If caught Then
+                If caught = 1 Then
 
                     Console.Clear()
                     Console.SetWindowSize(120, 30)
                     Console.WriteLine("You loose!")
                     Exit While
 
+                ElseIf caught = 2 Then
+
+                    Console.Clear()
+                    Console.SetWindowSize(120, 30)
+                    Console.WriteLine("You win!")
+                    Exit While
+
                 End If
 
             End While
 
-            Console.Write(vbNewLine & "Would you like to continue playing? (y/n)")
+            Console.Write(vbNewLine & "Would you like to continue playing? (y/n) ")
 
             Dim key = Console.ReadKey()
 
@@ -67,9 +75,6 @@
             End If
 
         End While
-
-
-        Console.ReadKey()
 
     End Sub
 
@@ -136,7 +141,7 @@
 
     End Sub
 
-    Sub UpdateCatchPos(ByRef DogPos As Vec2, ByRef CatchPos As Vec2, ByRef caught As Boolean)
+    Sub UpdateCatchPos(ByRef DogPos As Vec2, ByRef CatchPos As Vec2, ByRef caught As Integer)
 
 
 
