@@ -54,12 +54,12 @@
 
     End Enum
 
-    Const height As Integer = 16
-    Const width As Integer = 16
+    Const height As Byte = 16
+    Const width As Byte = 16
 
     Structure Objects
 
-        Dim map(,) As Integer
+        Dim map(,) As Byte
         Dim house As Vec2
         Dim DogPos As Vec2
         Dim CatchPos As Vec2
@@ -72,7 +72,7 @@
 
         While True
 
-            Dim gameState = state.null
+            Dim gameState As Byte = state.null
             Setup(obj)
 
             While True
@@ -116,13 +116,13 @@
 
                 End If
 
-            Loop Until LCase(key.Keychar) = "n" Or LCase(key.Keychar) = "y"
+            Loop Until LCase(key.Keychar) = "y"
 
         End While
 
     End Sub
 
-    Sub UpdateDogPos(ByRef obj As Objects, ByRef gameState As Integer)
+    Sub UpdateDogPos(ByRef obj As Objects, ByRef gameState As Byte)
 
         Dim allowed As Boolean = False
 
@@ -222,7 +222,7 @@
 
     End Sub
 
-    Sub UpdateCatchPos(ByRef obj As Objects, ByRef gameState As Integer)
+    Sub UpdateCatchPos(ByRef obj As Objects, ByRef gameState As Byte)
 
         Console.SetCursorPosition((obj.CatchPos.x * 2) + 1, obj.CatchPos.y)
         Console.Write(" ")
@@ -251,11 +251,11 @@
         Randomize()
         Dim rand As New Random
 
-        Dim temp(height + 1, width + 1) As Integer
+        Dim temp(height, width) As Byte
 
-        For i = 0 To height
+        For i As Byte = 0 To height
 
-            For l = 0 To width
+            For l As Byte = 0 To width
 
                 If Int(rand.Next(0, 1000)) < 50 Then
 
@@ -341,9 +341,9 @@
         Console.Clear()
         Console.CursorVisible = False
 
-        For j = 0 To height
+        For j As Byte = 0 To height
 
-            For i = 0 To width
+            For i As Byte = 0 To width
 
                 Console.Write("|")
 
