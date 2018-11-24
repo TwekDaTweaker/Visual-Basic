@@ -128,17 +128,18 @@
 
     End Enum
 
-    Const height As Byte = 15
-    Const width As Byte = 15
-
     Structure Objects
 
         Dim map(,) As Byte
         Dim house As Vec2
         Dim DogPos As Vec2
+        Dim DogPosOld As Vec2
         Dim CatchPos As Vec2
 
     End Structure
+
+    Const height As Byte = 15
+    Const width As Byte = 15
 
     Sub Main()
 
@@ -152,6 +153,7 @@
             While True
 
                 UpdateDogPos(obj, gameState)
+                UpdateCatchPos(obj, gameState)
                 UpdateCatchPos(obj, gameState)
 
                 If gameState = state.lost Then
@@ -283,6 +285,7 @@
                 Console.SetCursorPosition((obj.DogPos.x * 2) + 1, obj.DogPos.y)
                 Console.Write("D")
                 Console.ResetColor()
+                obj.DogPosOld = New Vec2(obj.DogPos.x, obj.DogPos.y)
 
             End If
 
@@ -297,6 +300,19 @@
     End Sub
 
     Sub UpdateCatchPos(ByRef obj As Objects, ByRef gameState As Byte)
+
+        If obj.CatchPos = obj.DogPosOld Then
+
+            Exit Sub
+
+        End If
+
+        If obj.CatchPos = obj.DogPos And gameState <> state.won Then
+
+            gameState = state.lost
+            Exit Sub
+
+        End If
 
         Dim oldPos As Vec2 = obj.CatchPos
 
@@ -325,20 +341,20 @@
         Dim openSet As New List(Of Nodes)
         Dim closedSet As New List(Of Nodes)
 
-        grid(obj.CatchPos.y, obj.CatchPos.x).h = heuristic(obj.CatchPos, obj.DogPos)
-        grid(obj.CatchPos.y, obj.CatchPos.x).vh = visualDist(obj.CatchPos, obj.DogPos)
+        grid(obj.CatchPos.y, obj.CatchPos.x).h = heuristic(obj.CatchPos, obj.DogPosOld)
+        grid(obj.CatchPos.y, obj.CatchPos.x).vh = visualDist(obj.CatchPos, obj.DogPosOld)
         grid(obj.CatchPos.y, obj.CatchPos.x).f = grid(obj.CatchPos.y, obj.CatchPos.x).h +
                                                  grid(obj.CatchPos.y, obj.CatchPos.x).g
         openSet.Add(grid(obj.CatchPos.y, obj.CatchPos.x))
 
-        Dim winner As Integer = 0
+        Dim winner As Long = 0
         Dim current As Nodes
         Dim neighbors As List(Of Nodes)
         Dim path As New List(Of Vec2)
 
         While openSet.Count > 0
 
-            For i = 1 To openSet.Count - 1
+            For i As Long = 1 To openSet.Count - 1
 
                 If openSet(i).f < openSet(winner).f Then
 
@@ -365,7 +381,7 @@
 
             current = openSet(winner)
 
-            If current = openSet.Last Then
+            If current.pos = obj.DogPosOld Then
 
                 Dim temp As Nodes = current
 
@@ -381,7 +397,6 @@
                 Exit While
 
             End If
-
 
             openSet.Remove(current)
             closedSet.Add(current)
@@ -408,8 +423,8 @@
                     End If
 
                     neighbor.g = tempG
-                    neighbor.h = heuristic(neighbor.pos, obj.DogPos)
-                    neighbor.vh = visualDist(neighbor.pos, obj.DogPos)
+                    neighbor.h = heuristic(neighbor.pos, obj.DogPosOld)
+                    neighbor.vh = visualDist(neighbor.pos, obj.DogPosOld)
                     neighbor.f = neighbor.h + neighbor.g
                     neighbor.prev = current
 
@@ -430,7 +445,7 @@
         Console.Write("C")
         Console.ResetColor()
 
-        If obj.CatchPos = obj.DogPos And gameState = state.null Then
+        If obj.CatchPos = obj.DogPos And gameState <> state.won Then
 
             gameState = state.lost
 
@@ -453,11 +468,13 @@
 
             For l As Byte = 0 To width
 
-                If Int(rand.Next(0, 1000)) < 50 Then
+                If Int(rand.Next(0, 1000)) < 60 Then
 
                     temp(i, l) = obsticle.bush
 
-                ElseIf Int(rand.Next(0, 1000)) < 80 Then
+                End If
+
+                If Int(rand.Next(0, 1000)) < 60 Then
 
                     temp(i, l) = obsticle.tree
 
@@ -486,6 +503,8 @@
                     Math.Abs(obj.DogPos.y - obj.house.y) > (height / 2) - 1) And
                     obj.map(obj.DogPos.y, obj.DogPos.x) = obsticle.null
 
+        obj.DogPosOld = New Vec2(obj.DogPos.x, obj.DogPos.y)
+
         Do
 
             obj.CatchPos = New Vec2(Int(rand.Next(0, width)), Int(rand.Next(0, height)))
@@ -495,12 +514,7 @@
                     obj.CatchPos <> obj.house And
                     obj.map(obj.CatchPos.y, obj.CatchPos.x) = obsticle.null
 
-        obj.map(obj.house.y, obj.house.x) = obsticle.bush
-
         Console.Write(".")
-
-        'setting up pathfinding
-
 
         Console.Write(".")
 
