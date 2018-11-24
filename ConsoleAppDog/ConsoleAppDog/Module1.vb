@@ -42,7 +42,8 @@
 
         Public pos As New Vec2(0, 0)
         Public f As Single
-        Public h As Single
+        Public vh As Single
+        Public h As Integer
         Public g As Integer = 0
         Public neighbors As New List(Of Nodes)
         Public prev As Nodes
@@ -306,7 +307,6 @@
             For l = 0 To width
 
                 grid(i, l) = New Nodes(New Vec2(l, i))
-                grid(i, l).pos = New Vec2(l, i)
 
             Next
 
@@ -326,6 +326,9 @@
         Dim closedSet As New List(Of Nodes)
 
         grid(obj.CatchPos.y, obj.CatchPos.x).h = heuristic(obj.CatchPos, obj.DogPos)
+        grid(obj.CatchPos.y, obj.CatchPos.x).vh = visualDist(obj.CatchPos, obj.DogPos)
+        grid(obj.CatchPos.y, obj.CatchPos.x).f = grid(obj.CatchPos.y, obj.CatchPos.x).h +
+                                                 grid(obj.CatchPos.y, obj.CatchPos.x).g
         openSet.Add(grid(obj.CatchPos.y, obj.CatchPos.x))
 
         Dim winner As Integer = 0
@@ -335,7 +338,7 @@
 
         While openSet.Count > 0
 
-            For i = 0 To openSet.Count - 1
+            For i = 1 To openSet.Count - 1
 
                 If openSet(i).f < openSet(winner).f Then
 
@@ -343,60 +346,74 @@
 
                 End If
 
-                current = openSet(winner)
+                If openSet(i).f = openSet(winner).f Then
 
-                If current = openSet.Last Then
+                    If openSet(i).g > openSet(winner).g Then
 
-                    Dim temp As Nodes = current
-                    Dim counter As Byte = 0
+                        winner = i
 
-                    path.Add(temp.pos)
+                    ElseIf openSet(i).g = openSet(winner).g And
+                           openSet(i).vh < openSet(winner).vh Then
 
-                    While temp.g > 0
-
-                        path.Add(temp.prev.pos)
-                        temp = temp.prev
-
-                    End While
-
-                End If
-
-                openSet.Remove(current)
-                closedSet.Add(current)
-
-                neighbors = current.neighbors
-
-                For j = 0 To neighbors.Count - 1
-
-                    Dim neighbor As Nodes = neighbors(j)
-                    Dim tempG As Integer
-
-                    If Not closedSet.Contains(neighbor) Then
-
-                        tempG = current.g + 1
-
-                        If closedSet.Contains(neighbor) Then
-
-                            If tempG < neighbor.g Then
-
-                                neighbor.g = tempG
-
-                            End If
-
-                        Else
-
-                            neighbor.g = tempG
-                            openSet.Add(neighbor)
-
-                        End If
-
-                        neighbor.h = heuristic(neighbor.pos, obj.DogPos)
-                        neighbor.f = neighbor.h + neighbor.g
-                        neighbor.prev = current
+                        winner = i
 
                     End If
 
-                Next
+                End If
+
+            Next
+
+            current = openSet(winner)
+
+            If current = openSet.Last Then
+
+                Dim temp As Nodes = current
+
+                path.Add(temp.pos)
+
+                While temp.g > 0
+
+                    path.Add(temp.prev.pos)
+                    temp = temp.prev
+
+                End While
+
+                Exit While
+
+            End If
+
+
+            openSet.Remove(current)
+            closedSet.Add(current)
+
+            neighbors = current.neighbors
+
+            For i = 0 To neighbors.Count - 1
+
+                Dim neighbor As Nodes = neighbors(i)
+                Dim tempG As Integer
+
+                If Not closedSet.Contains(neighbor) Then
+
+                    tempG = current.g + 1
+
+                    If Not openSet.Contains(neighbor) Then
+
+                        openSet.Add(neighbor)
+
+                    ElseIf tempG >= neighbor.g Then
+
+                        Continue For
+
+                    End If
+
+                    neighbor.g = tempG
+                    neighbor.h = heuristic(neighbor.pos, obj.DogPos)
+                    neighbor.vh = visualDist(neighbor.pos, obj.DogPos)
+                    neighbor.f = neighbor.h + neighbor.g
+                    neighbor.prev = current
+
+                End If
 
             Next
 
@@ -405,6 +422,7 @@
         Console.SetCursorPosition((oldPos.x * 2) + 1, oldPos.y)
         Console.Write(" ")
 
+        path.Reverse()
         obj.CatchPos = path(1)
 
         Console.ForegroundColor = ConsoleColor.Red
@@ -563,9 +581,15 @@
 
     End Sub
 
-    Function heuristic(ByVal pos1 As Vec2, ByVal pos2 As Vec2) As Single
+    Function heuristic(ByVal pos1 As Vec2, ByVal pos2 As Vec2) As Integer
 
         Return Math.Abs(pos1.x - pos2.x) + Math.Abs(pos1.y - pos2.y)
+
+    End Function
+
+    Function visualDist(ByVal pos1 As Vec2, ByVal pos2 As Vec2) As Single
+
+        Return ((pos1.x - pos2.x) ^ 2) + ((pos1.y - pos2.y) ^ 2)
 
     End Function
 
