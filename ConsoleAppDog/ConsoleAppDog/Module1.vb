@@ -38,6 +38,79 @@
 
     End Class
 
+    Public Class Nodes
+
+        Public pos As New Vec2(0, 0)
+        Public f As Single
+        Public h As Single
+        Public g As Integer = 0
+        Public neighbors As New List(Of Nodes)
+        Public prev As Nodes
+
+        Public Sub New(ByVal pos_in As Vec2)
+
+            pos = pos_in
+
+        End Sub
+
+        Public Sub addNeighbors(ByRef grid(,) As Nodes, ByRef map(,) As Byte)
+
+            If pos.y > 0 Then
+
+                If map(pos.y - 1, pos.x) = obsticle.null Then
+
+                    neighbors.Add(grid(pos.y - 1, pos.x))
+
+                End If
+
+            End If
+
+            If pos.y < height Then
+
+                If map(pos.y + 1, pos.x) = obsticle.null Then
+
+                    neighbors.Add(grid(pos.y + 1, pos.x))
+
+                End If
+
+            End If
+
+            If pos.x > 0 Then
+
+                If map(pos.y, pos.x - 1) = obsticle.null Then
+
+                    neighbors.Add(grid(pos.y, pos.x - 1))
+
+                End If
+
+            End If
+
+            If pos.x < width Then
+
+                If map(pos.y, pos.x + 1) = obsticle.null Then
+
+                    neighbors.Add(grid(pos.y, pos.x + 1))
+
+                End If
+
+            End If
+
+        End Sub
+
+        Public Shared Operator =(ByVal N1 As Nodes, ByVal N2 As Nodes) As Boolean
+
+            Return N1.pos.x = N2.pos.x And N1.pos.y = N2.pos.y
+
+        End Operator
+
+        Public Shared Operator <>(ByVal N1 As Nodes, ByVal N2 As Nodes) As Boolean
+
+            Return N1.pos.x <> N2.pos.x Or N1.pos.y <> N2.pos.y
+
+        End Operator
+
+    End Class
+
     Enum state
 
         null
@@ -54,8 +127,8 @@
 
     End Enum
 
-    Const height As Byte = 16
-    Const width As Byte = 16
+    Const height As Byte = 15
+    Const width As Byte = 15
 
     Structure Objects
 
@@ -224,10 +297,115 @@
 
     Sub UpdateCatchPos(ByRef obj As Objects, ByRef gameState As Byte)
 
-        Console.SetCursorPosition((obj.CatchPos.x * 2) + 1, obj.CatchPos.y)
+        Dim oldPos As Vec2 = obj.CatchPos
+
+        Dim grid(height, width) As Nodes
+
+        For i = 0 To height
+
+            For l = 0 To width
+
+                grid(i, l) = New Nodes(New Vec2(l, i))
+                grid(i, l).pos = New Vec2(l, i)
+
+            Next
+
+        Next
+
+        For i = 0 To height
+
+            For l = 0 To width
+
+                grid(l, i).addNeighbors(grid, obj.map)
+
+            Next
+
+        Next
+
+        Dim openSet As New List(Of Nodes)
+        Dim closedSet As New List(Of Nodes)
+
+        grid(obj.CatchPos.y, obj.CatchPos.x).h = heuristic(obj.CatchPos, obj.DogPos)
+        openSet.Add(grid(obj.CatchPos.y, obj.CatchPos.x))
+
+        Dim winner As Integer = 0
+        Dim current As Nodes
+        Dim neighbors As List(Of Nodes)
+        Dim path As New List(Of Vec2)
+
+        While openSet.Count > 0
+
+            For i = 0 To openSet.Count - 1
+
+                If openSet(i).f < openSet(winner).f Then
+
+                    winner = i
+
+                End If
+
+                current = openSet(winner)
+
+                If current = openSet.Last Then
+
+                    Dim temp As Nodes = current
+                    Dim counter As Byte = 0
+
+                    path.Add(temp.pos)
+
+                    While temp.g > 0
+
+                        path.Add(temp.prev.pos)
+                        temp = temp.prev
+
+                    End While
+
+                End If
+
+                openSet.Remove(current)
+                closedSet.Add(current)
+
+                neighbors = current.neighbors
+
+                For j = 0 To neighbors.Count - 1
+
+                    Dim neighbor As Nodes = neighbors(j)
+                    Dim tempG As Integer
+
+                    If Not closedSet.Contains(neighbor) Then
+
+                        tempG = current.g + 1
+
+                        If closedSet.Contains(neighbor) Then
+
+                            If tempG < neighbor.g Then
+
+                                neighbor.g = tempG
+
+                            End If
+
+                        Else
+
+                            neighbor.g = tempG
+                            openSet.Add(neighbor)
+
+                        End If
+
+                        neighbor.h = heuristic(neighbor.pos, obj.DogPos)
+                        neighbor.f = neighbor.h + neighbor.g
+                        neighbor.prev = current
+
+                    End If
+
+                Next
+
+            Next
+
+        End While
+
+        Console.SetCursorPosition((oldPos.x * 2) + 1, oldPos.y)
         Console.Write(" ")
 
-        'insert A* algorithum here
+        obj.CatchPos = path(1)
 
         Console.ForegroundColor = ConsoleColor.Red
         Console.SetCursorPosition((obj.CatchPos.x * 2) + 1, obj.CatchPos.y)
@@ -341,13 +519,13 @@
         Console.Clear()
         Console.CursorVisible = False
 
-        For j As Byte = 0 To height
+        For i As Byte = 0 To height
 
-            For i As Byte = 0 To width
+            For l As Byte = 0 To width
 
                 Console.Write("|")
 
-                Select Case obj.map(j, i)
+                Select Case obj.map(i, l)
 
                     Case obsticle.bush
 
@@ -384,5 +562,11 @@
         Console.ResetColor()
 
     End Sub
+
+    Function heuristic(ByVal pos1 As Vec2, ByVal pos2 As Vec2) As Single
+
+        Return Math.Abs(pos1.x - pos2.x) + Math.Abs(pos1.y - pos2.y)
+
+    End Function
 
 End Module
