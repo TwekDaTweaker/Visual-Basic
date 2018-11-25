@@ -134,7 +134,9 @@
         Dim house As Vec2
         Dim DogPos As Vec2
         Dim DogPosOld As Vec2
+        Dim DogPosVisual As Vec2
         Dim CatchPos As Vec2
+        Dim extraTurn As Boolean
 
     End Structure
 
@@ -153,17 +155,26 @@
 
             While True
 
+                If (turn + 1) Mod 2 = 0 Or (turn + 1) Mod 3 = 0 Then
+
+                    obj.extraTurn = True
+
+                End If
+
                 UpdateDogPos(obj, gameState)
                 UpdateCatchPos(obj, obj.DogPosOld, gameState)
 
-                If turn Mod 3 = 0 Then
+                If turn Mod 2 = 0 Or turn Mod 3 = 0 Then
 
                     UpdateCatchPos(obj, obj.DogPosOld, gameState)
 
                 End If
 
+                obj.extraTurn = False
+
                 If gameState = state.lost Then
 
+                    Threading.Thread.Sleep(700)
                     Console.Clear()
                     Console.SetWindowSize(120, 30)
                     Console.WriteLine("You Lost!")
@@ -171,6 +182,7 @@
 
                 ElseIf gameState = state.won Then
 
+                    Threading.Thread.Sleep(700)
                     Console.Clear()
                     Console.SetWindowSize(120, 30)
                     Console.WriteLine("You Won!")
@@ -293,6 +305,7 @@
                 Console.SetCursorPosition((obj.DogPos.x * 2) + 1, obj.DogPos.y)
                 Console.Write("D")
                 Console.ResetColor()
+                obj.DogPosVisual = New Vec2(obj.DogPosOld.x, obj.DogPosOld.y)
                 obj.DogPosOld = New Vec2(obj.DogPos.x, obj.DogPos.y)
 
             ElseIf obj.map(obj.DogPos.y, obj.DogPos.x) = obsticle.bush Then
@@ -386,6 +399,15 @@
 
                         winner = i
 
+                    ElseIf finish = obj.DogPos Then
+
+                        If openSet(i).g = openSet(winner).g And
+                           openSet(i).vh < visualDist(openSet(winner).pos, obj.DogPosVisual) Then
+
+                            winner = i
+
+                        End If
+
                     ElseIf openSet(i).g = openSet(winner).g And
                            openSet(i).vh < openSet(winner).vh Then
 
@@ -477,7 +499,14 @@
 
         End If
 
-        Console.ForegroundColor = ConsoleColor.Red
+        Console.ForegroundColor = ConsoleColor.Yellow
+
+        If obj.extraTurn Then
+
+            Console.ForegroundColor = ConsoleColor.Red
+
+        End If
+
         Console.SetCursorPosition((obj.CatchPos.x * 2) + 1, obj.CatchPos.y)
         Console.Write("C")
         Console.ResetColor()
@@ -509,7 +538,7 @@
 
                 End If
 
-                If Int(rand.Next(0, 1000)) < 120 Then
+                If Int(rand.Next(0, 1000)) < 150 Then
 
                     temp(i, l) = obsticle.bush
 
@@ -541,6 +570,7 @@
                     obj.map(obj.DogPos.y, obj.DogPos.x) = obsticle.null
 
         obj.DogPosOld = New Vec2(obj.DogPos.x, obj.DogPos.y)
+        obj.DogPosVisual = New Vec2(obj.DogPos.x, obj.DogPos.y)
 
         Do
 
@@ -552,6 +582,8 @@
                     Math.Abs(obj.CatchPos.y - obj.house.y) < 3) And
                     obj.CatchPos <> obj.house And
                     obj.map(obj.CatchPos.y, obj.CatchPos.x) = obsticle.null
+
+        obj.extraTurn = False
 
         Console.ForegroundColor = ConsoleColor.Green
         Console.Write("H")
@@ -569,9 +601,16 @@
         Console.WriteLine("# - The dog can pass through bushes, but the catcher can't.")
         Console.WriteLine("T - Neither the dog or the catcher can pass through trees." & vbNewLine)
 
-        Console.WriteLine("Use 'w', 'a', 's' and 'd' to move.")
+        Console.Write("When the catcher turns ")
+        Console.ForegroundColor = ConsoleColor.Yellow
+        Console.Write("yellow")
+        Console.ResetColor()
+        Console.WriteLine(" it means it will travel 1 space instead Of 2.")
+        Console.WriteLine("At least 85% Of the levels are possible. I may Not have a life, but I'm not crazy." & vbNewLine)
 
-        Console.Write(vbNewLine & "Press any key to start.")
+        Console.WriteLine("Use 'w', 'a', 's' and 'd' to move." & vbNewLine)
+
+        Console.Write("Press any key to start. ")
         Console.ReadKey()
 
         Console.SetWindowSize(width * 2 + 3, height + 2)
