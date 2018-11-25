@@ -149,12 +149,18 @@
 
             Dim gameState As Byte = state.null
             Setup(obj)
+            Dim turn As Integer = 0
 
             While True
 
                 UpdateDogPos(obj, gameState)
-                UpdateCatchPos(obj, gameState)
-                UpdateCatchPos(obj, gameState)
+                UpdateCatchPos(obj, obj.DogPosOld, gameState)
+
+                If turn Mod 3 = 0 Then
+
+                    UpdateCatchPos(obj, obj.DogPosOld, gameState)
+
+                End If
 
                 If gameState = state.lost Then
 
@@ -171,6 +177,8 @@
                     Exit While
 
                 End If
+
+                turn += 1
 
             End While
 
@@ -287,6 +295,13 @@
                 Console.ResetColor()
                 obj.DogPosOld = New Vec2(obj.DogPos.x, obj.DogPos.y)
 
+            ElseIf obj.map(obj.DogPos.y, obj.DogPos.x) = obsticle.bush Then
+
+                Console.ForegroundColor = ConsoleColor.Blue
+                Console.SetCursorPosition((obj.DogPos.x * 2) + 1, obj.DogPos.y)
+                Console.Write("#")
+                Console.ResetColor()
+
             End If
 
         Loop Until allowed
@@ -299,10 +314,11 @@
 
     End Sub
 
-    Sub UpdateCatchPos(ByRef obj As Objects, ByRef gameState As Byte)
+    Sub UpdateCatchPos(ByRef obj As Objects, ByVal finish As Vec2, ByRef gameState As Byte)
 
-        If obj.CatchPos = obj.DogPosOld Then
+        If obj.CatchPos = finish And obj.CatchPos <> obj.DogPos Then
 
+            UpdateCatchPos(obj, obj.house, gameState)
             Exit Sub
 
         End If
@@ -341,20 +357,22 @@
         Dim openSet As New List(Of Nodes)
         Dim closedSet As New List(Of Nodes)
 
-        grid(obj.CatchPos.y, obj.CatchPos.x).h = heuristic(obj.CatchPos, obj.DogPosOld)
-        grid(obj.CatchPos.y, obj.CatchPos.x).vh = visualDist(obj.CatchPos, obj.DogPosOld)
+        grid(obj.CatchPos.y, obj.CatchPos.x).h = heuristic(obj.CatchPos, finish)
+        grid(obj.CatchPos.y, obj.CatchPos.x).vh = visualDist(obj.CatchPos, finish)
         grid(obj.CatchPos.y, obj.CatchPos.x).f = grid(obj.CatchPos.y, obj.CatchPos.x).h +
                                                  grid(obj.CatchPos.y, obj.CatchPos.x).g
         openSet.Add(grid(obj.CatchPos.y, obj.CatchPos.x))
 
-        Dim winner As Long = 0
         Dim current As Nodes
         Dim neighbors As List(Of Nodes)
         Dim path As New List(Of Vec2)
+        Dim found As Boolean = False
 
         While openSet.Count > 0
 
-            For i As Long = 1 To openSet.Count - 1
+            Dim winner As Integer = 0
+
+            For i = 1 To openSet.Count - 1
 
                 If openSet(i).f < openSet(winner).f Then
 
@@ -381,18 +399,20 @@
 
             current = openSet(winner)
 
-            If current.pos = obj.DogPosOld Then
+            If current.pos = finish Then
 
                 Dim temp As Nodes = current
 
                 path.Add(temp.pos)
 
-                While temp.g > 0
+                While temp.g > 1
 
                     path.Add(temp.prev.pos)
                     temp = temp.prev
 
                 End While
+
+                found = True
 
                 Exit While
 
@@ -403,7 +423,7 @@
 
             neighbors = current.neighbors
 
-            For i = 0 To neighbors.Count - 1
+            For i = 0 To neighbors.Count - 1 Step 1
 
                 Dim neighbor As Nodes = neighbors(i)
                 Dim tempG As Integer
@@ -423,8 +443,8 @@
                     End If
 
                     neighbor.g = tempG
-                    neighbor.h = heuristic(neighbor.pos, obj.DogPosOld)
-                    neighbor.vh = visualDist(neighbor.pos, obj.DogPosOld)
+                    neighbor.h = heuristic(neighbor.pos, finish)
+                    neighbor.vh = visualDist(neighbor.pos, finish)
                     neighbor.f = neighbor.h + neighbor.g
                     neighbor.prev = current
 
@@ -434,11 +454,24 @@
 
         End While
 
+        If Not found Then
+
+            UpdateCatchPos(obj, obj.house, gameState)
+            Exit Sub
+
+        End If
+
         Console.SetCursorPosition((oldPos.x * 2) + 1, oldPos.y)
         Console.Write(" ")
 
         path.Reverse()
-        obj.CatchPos = path(1)
+        obj.CatchPos = path(0)
+
+        If obj.CatchPos = obj.house Then
+
+            obj.CatchPos = oldPos
+
+        End If
 
         Console.ForegroundColor = ConsoleColor.Red
         Console.SetCursorPosition((obj.CatchPos.x * 2) + 1, obj.CatchPos.y)
@@ -456,9 +489,7 @@
     Sub Setup(ByRef obj As Objects)
 
         Console.Clear()
-        Console.Write("Setting up")
 
-        'setting up obsticles
         Randomize()
         Dim rand As New Random
 
@@ -468,13 +499,13 @@
 
             For l As Byte = 0 To width
 
-                If Int(rand.Next(0, 1000)) < 60 Then
+                If Int(rand.Next(0, 1000)) < 120 Then
 
                     temp(i, l) = obsticle.bush
 
                 End If
 
-                If Int(rand.Next(0, 1000)) < 60 Then
+                If Int(rand.Next(0, 1000)) < 100 Then
 
                     temp(i, l) = obsticle.tree
 
@@ -486,14 +517,16 @@
 
         obj.map = temp
 
-        Console.Write(".")
-
-        'setting up game objects
         Do
 
-            obj.house = New Vec2(Int(rand.Next(0, width)), Int(rand.Next(0, height)))
+            obj.house = New Vec2(Int(rand.Next(1, width - 1)), Int(rand.Next(1, height - 1)))
 
         Loop Until obj.map(obj.house.y, obj.house.x) = obsticle.null
+
+        obj.map(obj.house.y + 1, obj.house.x) = obsticle.null
+        obj.map(obj.house.y - 1, obj.house.x) = obsticle.null
+        obj.map(obj.house.y, obj.house.x + 1) = obsticle.null
+        obj.map(obj.house.y, obj.house.x - 1) = obsticle.null
 
         Do
 
@@ -509,16 +542,12 @@
 
             obj.CatchPos = New Vec2(Int(rand.Next(0, width)), Int(rand.Next(0, height)))
 
-        Loop Until (Math.Abs(obj.DogPos.x - obj.CatchPos.x) > 2 Or
-                    Math.Abs(obj.DogPos.y - obj.CatchPos.y) > 2) And
+        Loop Until (Math.Abs(obj.CatchPos.x - obj.DogPos.x) > 2 Or
+                    Math.Abs(obj.CatchPos.y - obj.DogPos.y) > 2) And
+                    (Math.Abs(obj.CatchPos.x - obj.house.x) < 3 Or
+                    Math.Abs(obj.CatchPos.y - obj.house.y) < 3) And
                     obj.CatchPos <> obj.house And
                     obj.map(obj.CatchPos.y, obj.CatchPos.x) = obsticle.null
-
-        Console.Write(".")
-
-        Console.Write(".")
-
-        Console.WriteLine(" Done!" & vbNewLine)
 
         Console.ForegroundColor = ConsoleColor.Green
         Console.Write("H")
