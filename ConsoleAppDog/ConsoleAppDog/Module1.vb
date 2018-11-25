@@ -464,10 +464,14 @@
         Console.SetCursorPosition((oldPos.x * 2) + 1, oldPos.y)
         Console.Write(" ")
 
+        Console.ForegroundColor = ConsoleColor.Green
+        Console.SetCursorPosition((obj.house.x * 2) + 1, obj.house.y)
+        Console.Write("H")
+
         path.Reverse()
         obj.CatchPos = path(0)
 
-        If obj.CatchPos = obj.house Then
+        If obj.CatchPos = obj.house And finish = obj.house Then
 
             obj.CatchPos = oldPos
 
@@ -499,15 +503,15 @@
 
             For l As Byte = 0 To width
 
-                If Int(rand.Next(0, 1000)) < 120 Then
-
-                    temp(i, l) = obsticle.bush
-
-                End If
-
                 If Int(rand.Next(0, 1000)) < 100 Then
 
                     temp(i, l) = obsticle.tree
+
+                End If
+
+                If Int(rand.Next(0, 1000)) < 120 Then
+
+                    temp(i, l) = obsticle.bush
 
                 End If
 
