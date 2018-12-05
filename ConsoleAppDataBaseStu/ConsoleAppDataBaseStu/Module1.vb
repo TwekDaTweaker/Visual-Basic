@@ -1,6 +1,6 @@
 ﻿Module Module1
 
-    Enum title
+    Enum tit
 
         Mr
         Mrs
@@ -15,13 +15,26 @@
         Public age As Integer
         Public favSubject As String
 
-        Sub New(ByVal su As Student)
+        Sub New()
 
-            title = su.title
-            firstName = su.firstName
-            lastName = su.lastName
-            age = su.age
-            favSubject = su.favSubject
+            Dim temp As String = Console.ReadLine()
+
+            Select Case LCase(temp)
+
+                Case "mr"
+
+                    title = tit.Mr
+
+                Case "mrs"
+
+                    title = tit.Mrs
+
+            End Select
+
+            firstName = Console.ReadLine()
+            lastName = Console.ReadLine()
+            age = Console.ReadLine()
+            favSubject = Console.ReadLine()
 
         End Sub
 
@@ -46,34 +59,16 @@
 
             Dim key = Console.ReadKey()
 
-            Select Case key.Key
+            Select Case key.KeyChar
 
-                Case 1
+                Case "1"
 
-                    Dim temp As Student
-                    Dim tit As String = Console.ReadLine
+                    Console.Clear()
+                    record.Add(New Student())
 
-                    Select Case LCase(tit)
+                Case "2"
 
-                        Case "mr"
-
-                            temp.title = title.Mr
-
-                        Case "mrs"
-
-                            temp.title = title.Mrs
-
-                    End Select
-
-                    temp.firstName = Console.ReadLine()
-                    temp.lastName = Console.ReadLine()
-                    temp.age = Console.ReadLine()
-                    temp.favSubject = Console.ReadLine()
-
-                    record.Add(temp)
-
-                Case 2
-
+                    Console.Clear()
                     Dim name As String = ""
 
                     While True
@@ -81,28 +76,39 @@
                         Dim letter = Console.ReadKey()
                         name &= letter.KeyChar
 
+                        Dim found As New List(Of Student)
+
                         For i = 0 To record.Count - 1
 
-                            If InStr(record(i).firstName, name) Then
+                            If InStr(record(i).firstName, name) > 0 Then
 
-
+                                found.Add(record(i))
 
                             End If
 
                         Next
 
+                        For i = 0 To found.Count
+
+                            found(i).Show()
+
+                        Next
+
                     End While
 
-                Case 3
+                Case "3"
+
+                    Console.Clear()
 
 
+                Case "4"
 
-                Case 4
-
-
+                    Console.Clear()
+                    Exit While
 
                 Case Else
 
+                    Console.Clear()
                     Console.WriteLine("Please select from 1 to 4.")
 
             End Select
@@ -112,24 +118,3 @@
     End Sub
 
 End Module
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
