@@ -1,4 +1,6 @@
-﻿Module Module1
+﻿Imports System.IO
+
+Module Module1
 
     Enum tit
 
@@ -50,6 +52,30 @@
 
         Dim record As New List(Of Student)
 
+        Dim filename As String = Directory.GetCurrentDirectory & "..\..\..\database.txt"
+        Dim line As String
+
+        Using Writer As StreamWriter = New StreamWriter(filename)
+
+            For i = 0 To 9
+
+                Writer.WriteLine("This is line: " & i + 1)
+
+            Next
+
+        End Using
+
+        Using Reader As StreamReader = New StreamReader(filename)
+
+            Do Until Reader.EndOfStream
+
+                line = Reader.ReadLine()
+                Console.WriteLine(line)
+
+            Loop
+
+        End Using
+
         While True
 
             Console.WriteLine("(1) Add a record")
@@ -98,8 +124,13 @@
 
                 Case "3"
 
-                    Console.Clear()
+                    For i = 0 To record.Count - 1
 
+                        record(i).Show()
+
+                    Next
+
+                    Console.Clear()
 
                 Case "4"
 
