@@ -28,6 +28,36 @@ Module Module1
 
         End Using
 
+        filename = "MyFile.bin"
+
+        Using writer As BinaryWriter = New BinaryWriter(File.Open(filename, FileMode.OpenOrCreate))
+
+            writer.Write(5)
+
+            writer.Write("Hello, world")
+
+            writer.Write(True)
+
+        End Using
+
+        Dim myInt As Integer
+
+        Dim myString As String
+
+        Dim myBool As Boolean
+
+        Using reader As BinaryReader = New BinaryReader(File.OpenRead(filename))
+
+            myInt = reader.ReadInt32
+
+            myString = reader.ReadString
+
+            myBool = reader.ReadBoolean
+
+        End Using
+
+        Console.WriteLine(myInt & ", " & myString & ", " & myBool)
+
         Console.ReadKey()
 
     End Sub
