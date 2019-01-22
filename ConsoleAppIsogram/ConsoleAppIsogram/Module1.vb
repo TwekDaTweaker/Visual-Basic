@@ -12,19 +12,20 @@
 
     Function Isogram(ByVal str As String) As Boolean
 
-        Dim lett As New List(Of String)
+        str = str.ToLower()
+        Dim letters As New List(Of String)
 
         For i = 0 To str.Length - 1
 
-            If Asc(LCase(str(i))) >= 97 And Asc(LCase(str(i))) <= 122 Then
+            If Asc(str(i)) >= 97 And Asc(str(i)) <= 122 Then
 
                 Dim found As Boolean = False
 
-                For Each item In lett
+                For j = 0 To letters.Count - 1
 
-                    If LCase(str(i)) = item(0) Then
+                    If str(i) = letters(j)(0) Then
 
-                        item &= LCase(str(i))
+                        letters(j) &= str(i)
                         found = True
                         Exit For
 
@@ -34,7 +35,7 @@
 
                 If Not found Then
 
-                    lett.Add(LCase(str(i)))
+                    letters.Add(LCase(str(i)))
 
                 End If
 
@@ -42,13 +43,13 @@
 
         Next
 
-        If lett.Count > 0 Then
+        If letters.Count > 0 Then
 
-            Dim def As Integer = lett(0).Length()
+            Dim def As Integer = letters(0).Length()
 
-            For i = 1 To lett.Count - 1
+            For i = 1 To letters.Count - 1
 
-                If lett(i).Length() <> def Then
+                If letters(i).Length() <> def Then
 
                     Return False
 
