@@ -204,10 +204,52 @@
     End Sub
 
     Sub viewclass()
+
         'In this sub the user enters in a class name.  
         'If the class exists then the teacher of the class is displayed  (SQL required for this)
         'also a list of the pupils in the class is displayed (SQL required for this)
-        Console.ReadKey()
+
+        Console.WriteLine("List of all classes:" & vbNewLine)
+
+        Dim rclasses As Odbc.OdbcDataReader
+        Dim sql As New Odbc.OdbcCommand("select * from classes order by id", conn)
+        rclasses = sql.ExecuteReader
+
+        Do While rclasses.Read
+
+            Console.WriteLine(rclasses("name") & " | " & rclasses("teacher"))
+
+        Loop
+
+        Console.Write(vbNewLine & "Enter the class you want to expand: ")
+        Dim name As String = Console.ReadLine()
+        Console.WriteLine()
+
+        sql = New Odbc.OdbcCommand("select classes.id from classes where classes.name='" & name & "'", conn)
+        Dim classesId = sql.ExecuteReader
+        classesId.Read()
+        Dim id As Integer = classesId("id")
+        sql = New Odbc.OdbcCommand("select enrolment.pupilsId from enrolment where classesId='" & id & "'", conn)
+        Dim pupilsId = sql.ExecuteReader
+        Dim ids As New List(Of Integer)
+
+        Do While pupilsId.Read()
+
+            ids.Add(pupilsId("pupilsId"))
+
+        Loop
+
+        For Each id In ids
+
+            sql = New Odbc.OdbcCommand("select * from pupils where id='" & id & "'", conn)
+            Dim rspupils = sql.ExecuteReader
+            rspupils.Read()
+            Console.WriteLine(rspupils("id") & " " & rspupils("house") & " " & rspupils("forename") & " " & rspupils("surname") & " " & rspupils("age"))
+
+        Next
+
+        Console.ReadKey(True)
+
     End Sub
 
     Sub addclass()
@@ -215,43 +257,90 @@
         'In this sub the user enters in a new class  
         'The user enters a class name and a teacher which is put into the database (SQL required for this)
 
+        Console.Write("Enter class name: ")
         Dim name As String = Console.ReadLine()
+        Console.Write("Enter the teacher's name: ")
         Dim teacher As String = Console.ReadLine()
 
+        Dim sql As New Odbc.OdbcCommand("INSERT INTO classes(name, teacher) VALUES ('" & name & "', '" & teacher & "')", conn)
+        sql.ExecuteNonQuery()
 
-
-        Console.ReadKey()
+        Console.ReadKey(True)
 
     End Sub
 
     Sub deleteclass()
+
         'In this sub the user deltes a class  
         'The user enters a class name 
         'Firstly the id of the class will need to be retieved(SQL required for this)
         'Then any enrolments with this class need to be deleted (SQL required for this)
         'Finally the class needs to be deleted from the classes table (SQL required for this)
+
+        Console.WriteLine("List of all classes:" & vbNewLine)
+
+        Dim rclasses As Odbc.OdbcDataReader
+        Dim sql As New Odbc.OdbcCommand("select * from classes order by id", conn)
+        rclasses = sql.ExecuteReader
+
+        Do While rclasses.Read
+
+            Console.WriteLine(rclasses("name") & " | " & rclasses("teacher"))
+
+        Loop
+
+        Console.Write(vbNewLine & "Enter the class you want to delete: ")
+        Dim name As String = Console.ReadLine()
+        Console.WriteLine()
+
+        sql = New Odbc.OdbcCommand("select classes.id from classes where classes.name='" & name & "'", conn)
+        Dim classesId = sql.ExecuteReader
+        classesId.Read()
+        Dim id As Integer = classesId("id")
+
+        sql = New Odbc.OdbcCommand("delete * from enrolment where classesId='" & id & "'", conn)
+        Dim classDel = sql.ExecuteNonQuery
+        sql = New Odbc.OdbcCommand("delete * from classes where id='" & id & "'", conn)
+        classDel = sql.ExecuteNonQuery
+
         Console.ReadKey()
+
     End Sub
 
     Sub viewallclasses()
+
         'This sub displays all the classes and the teachers (SQL required for this)
+
+
+
         Console.ReadKey()
+
     End Sub
 
     Sub enrolpupil()
+
         'This sub enrols a particular pupil onto a particular class
         'User enters a pupil surname. Use the findpupil function here to help choose the pupil as maybe more than one with same surname
         'Then user enters class name. Need to get class details from database (SQL required for this)
         'Then insert a new enrolment into the enrolment table using the pupil id and class id found before (SQL required for this)
+
+
+
         Console.ReadKey()
+
     End Sub
 
     Sub removeenrolment()
+
         'This sub removes a pupil from a class
         'User enters a class. Need to get class details from database (SQL required for this)
         'User enters a pupil surname. Use the findpupil function here to help choose the pupil as maybe more than one with same surname
         'Then delete the enrolment from the enrolment table using the pupil id and class id found before (SQL required for this)
+
+
+
         Console.ReadKey()
+
     End Sub
 
     'Menus all coded for you
