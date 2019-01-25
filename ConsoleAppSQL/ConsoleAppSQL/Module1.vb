@@ -239,14 +239,24 @@
 
         Loop
 
+        Dim req As String = "select * from pupils where "
+
         For Each id In ids
 
-            sql = New Odbc.OdbcCommand("select * from pupils where id='" & id & "'", conn)
-            Dim rspupils = sql.ExecuteReader
-            rspupils.Read()
-            Console.WriteLine(rspupils("id") & " " & rspupils("house") & " " & rspupils("forename") & " " & rspupils("surname") & " " & rspupils("age"))
+            req &= "id='" & id & "' or"
 
         Next
+
+
+
+        sql = New Odbc.OdbcCommand(req)
+        Dim rspupils = sql.ExecuteReader
+
+        While rspupils.Read()
+
+            Console.WriteLine(rspupils("id") & " " & rspupils("house") & " " & rspupils("forename") & " " & rspupils("surname") & " " & rspupils("age"))
+
+        End While
 
         Console.ReadKey(True)
 
@@ -303,7 +313,7 @@
         sql = New Odbc.OdbcCommand("delete * from classes where id='" & id & "'", conn)
         classDel = sql.ExecuteNonQuery
 
-        Console.ReadKey()
+        Console.ReadKey(True)
 
     End Sub
 
@@ -311,9 +321,19 @@
 
         'This sub displays all the classes and the teachers (SQL required for this)
 
+        Console.WriteLine("List of all classes:" & vbNewLine)
 
+        Dim rclasses As Odbc.OdbcDataReader
+        Dim sql As New Odbc.OdbcCommand("select * from classes order by id", conn)
+        rclasses = sql.ExecuteReader
 
-        Console.ReadKey()
+        Do While rclasses.Read
+
+            Console.WriteLine(rclasses("name") & " | " & rclasses("teacher"))
+
+        Loop
+
+        Console.ReadKey(True)
 
     End Sub
 
@@ -326,7 +346,7 @@
 
 
 
-        Console.ReadKey()
+        Console.ReadKey(True)
 
     End Sub
 
@@ -339,7 +359,7 @@
 
 
 
-        Console.ReadKey()
+        Console.ReadKey(True)
 
     End Sub
 
