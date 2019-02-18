@@ -41,6 +41,7 @@ Module Module1
     Sub LoadData(ByRef record As List(Of Student), ByVal filename As String)
 
         Using Reader As BinaryReader = New BinaryReader(File.OpenRead(filename))
+            record.Clear()
             Dim count As Integer = Reader.ReadInt32
             For i = 0 To count - 1
 
