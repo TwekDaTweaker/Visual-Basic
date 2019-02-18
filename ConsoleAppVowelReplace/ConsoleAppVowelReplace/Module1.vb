@@ -5,51 +5,52 @@ Module Module1
     Sub Main()
 
         Dim filename As String = Directory.GetCurrentDirectory & "..\..\..\vowels.txt"
-        Dim line As String
+        Dim lineS As String
         Dim a, o, u, e, i As Integer
 
         Using Reader As StreamReader = New StreamReader(filename)
 
-            line = Reader.ReadLine()
+            lineS = Reader.ReadLine()
 
         End Using
 
-        For i = 0 To line.Length() - 1
+        Dim oldline As String = lineS
+        Dim line As New List(Of String)
+
+        For i = 0 To lineS.Length - 1
+            Dim temp As String = lineS(i)
+            line.Add(temp)
+        Next
+
+        For i = 0 To line.Count - 1
 
             Select Case LCase(line(i))
-
                 Case "a"
-
-                    line = Mid(line, 1, i - 1) & Right(line, line.Length() - i - 1)
                     a += 1
-
                 Case "o"
-
                     o += 1
-                    line = Mid(line, 1, i - 1) & Right(line, line.Length() - i - 1)
-
                 Case "u"
-
                     u += 1
-                    line = Mid(line, 1, i - 1) & Right(line, line.Length() - i - 1)
-
                 Case "e"
-
                     e += 1
-                    line = Mid(line, 1, i - 1) & Right(line, line.Length() - i - 1)
-
                 Case "i"
-
                     i += 1
-                    line = Mid(line, 1, i - 1) & Right(line, line.Length() - i - 1)
-
+                Case Else
+                    Continue For
             End Select
+            line.Remove(line(i))
 
+        Next
+
+        lineS = ""
+        For Each e In line
+            lineS &= e
         Next
 
         Using Writer As StreamWriter = New StreamWriter(filename)
 
-            Writer.WriteLine(line)
+            Writer.WriteLine(oldline)
+            Writer.WriteLine(lineS)
 
         End Using
 

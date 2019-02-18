@@ -2,108 +2,91 @@
 
 Module Module1
 
-    Enum tit
-
-        Mr
-        Mrs
-
-    End Enum
-
     Class Student
 
-        Public title As Byte
-        Public firstName As String
-        Public lastName As String
-        Public age As Integer
-        Public favSubject As String
+        Public title As String = ""
+        Public firstName As String = ""
+        Public lastName As String = ""
+        Public age As Integer = 0
+        Public favSubject As String = ""
 
-        Sub New()
+        Sub Init()
 
-            Dim temp As String = Console.ReadLine()
-
-            Select Case LCase(temp)
-
-                Case "mr"
-
-                    title = tit.Mr
-
-                Case "mrs"
-
-                    title = tit.Mrs
-
-            End Select
-
+            Console.Write("Title: ")
+            title = Console.ReadLine()
+            Console.Write("First name: ")
             firstName = Console.ReadLine()
+            Console.Write("Last name: ")
             lastName = Console.ReadLine()
+            Console.Write("Age: ")
             age = Console.ReadLine()
+            Console.Write("Favourite subject: ")
             favSubject = Console.ReadLine()
 
         End Sub
 
         Sub Show()
 
-            Console.Write(vbNewLine & vbNewLine & "nope")
+            Console.WriteLine()
+            Console.WriteLine("Title: " & title)
+            Console.WriteLine("First name: " & firstName)
+            Console.WriteLine("Last name: " & lastName)
+            Console.WriteLine("Age: " & age)
+            Console.WriteLine("Favourite subject: " & favSubject)
 
         End Sub
 
     End Class
 
+    Sub LoadData(ByRef record As List(Of Student), ByVal filename As String)
+
+        Using Reader As BinaryReader = New BinaryReader(File.OpenRead(filename))
+            Dim count As Integer = Reader.ReadInt32
+            For i = 0 To count - 1
+
+                Dim temp As New Student
+                temp.title = Reader.ReadString
+                temp.firstName = Reader.ReadString
+                temp.lastName = Reader.ReadString
+                temp.age = Reader.ReadInt32
+                temp.favSubject = Reader.ReadString
+                record.Add(temp)
+
+            Next
+        End Using
+
+    End Sub
+
+    Sub SaveData(ByVal record As List(Of Student), ByVal filename As String)
+
+        Using Writer As BinaryWriter = New BinaryWriter(File.Open(filename, FileMode.OpenOrCreate))
+            Writer.Write(record.Count)
+            For Each stu In record
+
+                Writer.Write(stu.title)
+                Writer.Write(stu.firstName)
+                Writer.Write(stu.lastName)
+                Writer.Write(stu.age)
+                Writer.Write(stu.favSubject)
+
+            Next
+        End Using
+
+    End Sub
+
     Sub Main()
 
         Dim record As New List(Of Student)
-        Dim filename As String = Directory.GetCurrentDirectory & "..\..\..\database.txt"
-        Dim line As String
-
-        Using Reader As StreamReader = New StreamReader(filename)
-
-            Dim current As Student
-
-            Do Until Reader.EndOfStream
-
-                line = Reader.ReadLine()
-
-                If line(0) = "#" Then
-
-                    Select Case line(1)
-
-                        Case "1"
-
-                            current.title = CByte(Mid(line, 2, line.Length))
-
-                        Case "2"
-
-                            current.firstName = Mid(line, 2, line.Length - 1)
-
-                        Case "3"
-
-                            current.lastName = Mid(line, 2, line.Length - 1)
-
-                        Case "4"
-
-                            current.age = CInt(Mid(line, 2, line.Length - 1))
-
-                        Case "5"
-
-                            current.favSubject = Mid(line, 2, line.Length - 1)
-
-                        Case Else
-
-                            record.Add(current)
-
-                    End Select
-
-                End If
-
-            Loop
-
-        End Using
+        Dim filename As String = Directory.GetCurrentDirectory & "..\..\..\database.bin"
 
         While True
 
             Console.WriteLine("(1) Add a record")
             Console.WriteLine("(2) View a record")
             Console.WriteLine("(3) View all records")
-            Console.WriteLine("(4) Exit")
+            Console.WriteLine("(4) Save data to file")
+            Console.WriteLine("(5) Load data from file")
+            Console.WriteLine("(6) Exit")
 
             Dim key = Console.ReadKey()
 
@@ -112,49 +95,59 @@ Module Module1
                 Case "1"
 
                     Console.Clear()
-                    record.Add(New Student())
+                    Dim temp As New Student
+                    temp.Init()
+                    record.Add(temp)
+                    Console.Clear()
 
                 Case "2"
 
                     Console.Clear()
                     Dim name As String = ""
-
+                    Console.WriteLine("Press escape to exit.")
                     While True
-
                         Dim letter = Console.ReadKey()
+                        If letter.Key = ConsoleKey.Escape Then
+                            Console.Clear()
+                            Exit While
+                        End If
                         name &= letter.KeyChar
-
                         Dim found As New List(Of Student)
-
-                        For i = 0 To record.Count - 1
-
-                            If InStr(record(i).firstName, name) > 0 Then
-
-                                found.Add(record(i))
-
+                        For Each r In record
+                            If InStr(LCase(r.firstName), LCase(name)) > 0 Then
+                                found.Add(r)
+                            ElseIf InStr(LCase(r.lastName), LCase(name)) Then
+                                found.Add(r)
                             End If
-
                         Next
-
-                        For i = 0 To found.Count - 1
-
-                            found(i).Show()
-
+                        Console.SetCursorPosition(0, 1)
+                        Console.WriteLine(name)
+                        For Each r In found
+                            r.Show()
                         Next
-
+                        Console.SetCursorPosition(name.Length, 1)
                     End While
 
                 Case "3"
 
-                    For i = 0 To record.Count - 1
-
-                        record(i).Show()
-
-                    Next
-
                     Console.Clear()
+                    Console.SetCursorPosition(0, 6)
+                    For Each r In record
+                        r.Show()
+                    Next
+                    Console.SetCursorPosition(0, 0)
 
                 Case "4"
+
+                    Console.Clear()
+                    SaveData(record, filename)
+
+                Case "5"
+
+                    Console.Clear()
+                    LoadData(record, filename)
+
+                Case "6"
 
                     Console.Clear()
                     Exit While
@@ -162,26 +155,11 @@ Module Module1
                 Case Else
 
                     Console.Clear()
-                    Console.WriteLine("Please select from 1 to 4.")
+                    Console.WriteLine("Please select from 1 to 6.")
 
             End Select
 
         End While
-
-        Using Writer As StreamWriter = New StreamWriter(filename)
-
-            For i = 0 To record.Count - 1
-
-                Writer.WriteLine("#1" & record(i).title)
-                Writer.WriteLine("#2" & record(i).firstName)
-                Writer.WriteLine("#3" & record(i).lastName)
-                Writer.WriteLine("#4" & record(i).age)
-                Writer.WriteLine("#5" & record(i).favSubject)
-                Writer.WriteLine("#   ")
-
-            Next
-
-        End Using
 
     End Sub
 
