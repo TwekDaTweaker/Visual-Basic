@@ -226,7 +226,7 @@
 
             Console.ForegroundColor = ConsoleColor.Green
             Console.SetCursorPosition(obj.house.x * 2 + 1, obj.house.y)
-            Dim key = Console.ReadKey()
+            Dim key = Console.ReadKey(True)
             Console.SetCursorPosition(obj.house.x * 2 + 1, obj.house.y)
             Console.Write("H")
             Console.ResetColor()
@@ -669,7 +669,7 @@
 
     Function heuristic(ByVal pos1 As Vec2, ByVal pos2 As Vec2) As Integer
 
-        Return Math.Abs(pos1.x - pos2.x) + Math.Abs(pos1.y - pos2.y)
+        Return Math.Sqrt(Math.Abs(pos1.x - pos2.x) + Math.Abs(pos1.y - pos2.y))
 
     End Function
 
