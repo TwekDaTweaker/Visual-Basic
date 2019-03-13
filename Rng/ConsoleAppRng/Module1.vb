@@ -3,6 +3,8 @@
     Sub Main()
 
         Randomize()
+        Dim rand As New Random()
+        rand.Next(2, 8)
 
         Dim a As String
 
