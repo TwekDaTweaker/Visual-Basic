@@ -188,9 +188,9 @@
                     Console.WriteLine("You Won!")
                     Exit While
 
-                    cc
+                End If
 
-                    turn += 1
+                turn += 1
 
             End While
 
