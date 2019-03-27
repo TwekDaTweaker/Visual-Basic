@@ -35,8 +35,6 @@
     End Sub
 
     Public Sub MakeChild(ByRef child As Part)
-        Dim c As ConsoleColor = ConsoleColor.Green
-        If color = ConsoleColor.Green Then c = ConsoleColor.DarkGreen
         child = New Part(Me.GetPos(), Me)
     End Sub
 

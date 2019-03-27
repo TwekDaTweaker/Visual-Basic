@@ -2,13 +2,9 @@
 
     Inherits Part
 
-    Enum Terrain
-        null
-        wall
-        food
-    End Enum
-
     Private vel As New Vec2(0, 0)
+    Private elapsedTime As Decimal
+    Private speed As Decimal
 
     Public Sub New(ByVal pos As Vec2)
         MyBase.New(pos, Nothing)
@@ -19,38 +15,36 @@
             temp = rand.Next(-1, 2)
         End While
         vel.x = temp
-        temp = 0
-        While temp = 0
-            temp = rand.Next(-1, 2)
-        End While
-        vel.y = temp
+        vel.y = 0
+        speed = 6
         Console.CursorVisible = False
     End Sub
 
-    Public Sub Update(ByVal board(,) As Terrain, ByRef parts As List(Of Part))
-        Dim key = Console.ReadKey(True)
-        Select Case LCase(key.KeyChar())
-            Case "w"
-                vel.y = -1
-                vel.x = 0
-            Case "a"
-                vel.x = -1
-                vel.y = 0
-            Case "s"
-                vel.y = +1
-                vel.x = 0
-            Case "d"
-                vel.x = +1
-                vel.y = 0
-        End Select
-        Draw(pos, ConsoleColor.Black) 'Potential bugs
-        Me.pos += vel
-        Draw()
-        If board(pos.y, pos.x) = Terrain.food Then
-            Dim temp As New Part(parts(parts.Count - 1).GetPos(), parts(parts.Count - 1))
-            Me.MakeChild(temp)
-            parts.Add(temp)
+    Public Overloads Sub Update(ByRef food As List(Of Vec2), ByRef parts As List(Of Part), ByVal dt As Decimal)
+        If Console.KeyAvailable = True Then
+            Dim key = Console.ReadKey(True)
+            Select Case LCase(key.KeyChar())
+                Case "w"
+                    vel.y = -1
+                    vel.x = 0
+                Case "a"
+                    vel.x = -1
+                    vel.y = 0
+                Case "s"
+                    vel.y = +1
+                    vel.x = 0
+                Case "d"
+                    vel.x = +1
+                    vel.y = 0
+            End Select
         End If
+        If elapsedTime > (1 / speed) Then
+            Draw(pos, ConsoleColor.Black) 'Potential bugs
+            Me.pos += vel
+            Draw()
+            elapsedTime = 0
+        End If
+        elapsedTime += dt
     End Sub
 
 End Class

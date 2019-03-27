@@ -1,22 +1,19 @@
 ﻿Module Module1
 
-    Enum Terrain
-        null
-        wall
-        food
-    End Enum
-
     Sub Main()
 
         Dim pos As New Vec2(3, 4)
-        Dim board(20, 20) As Terrain
         Dim snake As New Head(pos)
         Dim parts As New List(Of Part)
+        Dim food As New List(Of Vec2)
+        Dim ft As New FrameTimer
+        Dim dt As Decimal
 
         parts.Add(snake)
 
         While True
-            snake.Update(board, parts)
+            dt = ft.Mark()
+            snake.Update(food, parts, dt)
         End While
 
 

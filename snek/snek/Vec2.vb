@@ -34,4 +34,10 @@
 
     End Operator
 
+    Public Shared Operator *(ByVal vec As Vec2, ByVal mult As Double) As Vec2
+
+        Return New Vec2(vec.x * mult, vec.y * mult)
+
+    End Operator
+
 End Class
