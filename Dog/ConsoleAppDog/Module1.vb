@@ -6,34 +6,24 @@
         Public y As Integer = 0
 
         Public Sub New(ByVal in_x As Integer, ByVal in_y As Integer)
-
             x = in_x
             y = in_y
-
         End Sub
 
         Public Shared Operator =(ByVal V1 As Vec2, ByVal V2 As Vec2) As Boolean
-
             Return V1.x = V2.x And V1.y = V2.y
-
         End Operator
 
         Public Shared Operator <>(ByVal V1 As Vec2, ByVal V2 As Vec2) As Boolean
-
             Return V1.x <> V2.x Or V1.y <> V2.y
-
         End Operator
 
         Public Shared Operator +(ByVal V1 As Vec2, ByVal V2 As Vec2) As Vec2
-
             Return New Vec2(V1.x + V2.x, V1.y + V2.y)
-
         End Operator
 
         Public Shared Operator -(ByVal V1 As Vec2, ByVal V2 As Vec2) As Vec2
-
             Return New Vec2(V1.x - V2.x, V1.y - V2.y)
-
         End Operator
 
     End Class
@@ -49,65 +39,43 @@
         Public prev As Nodes
 
         Public Sub New(ByVal pos_in As Vec2)
-
             pos = pos_in
-
         End Sub
 
         Public Sub addNeighbors(ByRef grid(,) As Nodes, ByRef map(,) As Byte)
 
             If pos.y > 0 Then
-
                 If map(pos.y - 1, pos.x) = obsticle.null Then
-
                     neighbors.Add(grid(pos.y - 1, pos.x))
-
                 End If
-
             End If
 
             If pos.y < height Then
-
                 If map(pos.y + 1, pos.x) = obsticle.null Then
-
                     neighbors.Add(grid(pos.y + 1, pos.x))
-
                 End If
-
             End If
 
             If pos.x > 0 Then
-
                 If map(pos.y, pos.x - 1) = obsticle.null Then
-
                     neighbors.Add(grid(pos.y, pos.x - 1))
-
                 End If
-
             End If
 
             If pos.x < width Then
-
                 If map(pos.y, pos.x + 1) = obsticle.null Then
-
                     neighbors.Add(grid(pos.y, pos.x + 1))
-
                 End If
-
             End If
 
         End Sub
 
         Public Shared Operator =(ByVal N1 As Nodes, ByVal N2 As Nodes) As Boolean
-
             Return N1.pos.x = N2.pos.x And N1.pos.y = N2.pos.y
-
         End Operator
 
         Public Shared Operator <>(ByVal N1 As Nodes, ByVal N2 As Nodes) As Boolean
-
             Return N1.pos.x <> N2.pos.x Or N1.pos.y <> N2.pos.y
-
         End Operator
 
     End Class
@@ -155,21 +123,11 @@
 
             While True
 
-                If (turn + 1) Mod 2 = 0 Or (turn + 1) Mod 3 = 0 Then
-
-                    obj.extraTurn = True
-
-                End If
-
+                If (turn + 1) Mod 2 = 0 Or (turn + 1) Mod 3 = 0 Then obj.extraTurn = True
                 UpdateDogPos(obj, gameState)
                 UpdateCatchPos(obj, obj.DogPosOld, gameState)
 
-                If turn Mod 2 = 0 Or turn Mod 3 = 0 Then
-
-                    UpdateCatchPos(obj, obj.DogPosOld, gameState)
-
-                End If
-
+                If turn Mod 2 = 0 Or turn Mod 3 = 0 Then UpdateCatchPos(obj, obj.DogPosOld, gameState)
                 obj.extraTurn = False
 
                 If gameState = state.lost Then
@@ -195,23 +153,13 @@
             End While
 
             Console.Write(vbNewLine & "Would you like to continue playing? (y/n) ")
-
             Dim key
-
             Do
-
                 key = Console.ReadKey
-
                 Console.SetCursorPosition(42, 2)
                 Console.Write(" ")
                 Console.SetCursorPosition(42, 2)
-
-                If LCase(key.Keychar) = "n" Then
-
-                    Exit While
-
-                End If
-
+                If LCase(key.Keychar) = "n" Then Exit while
             Loop Until LCase(key.Keychar) = "y"
 
         End While
@@ -234,13 +182,9 @@
             Console.SetCursorPosition((obj.DogPos.x * 2) + 1, obj.DogPos.y)
 
             If obj.map(obj.DogPos.y, obj.DogPos.x) = obsticle.bush Then
-
                 Console.Write("#")
-
             Else
-
                 Console.Write(" ")
-
             End If
 
             Select Case LCase(key.KeyChar)
@@ -248,53 +192,45 @@
                 Case "w"
 
                     If obj.DogPos.y > 0 Then
-
                         If obj.map(obj.DogPos.y - 1, obj.DogPos.x) <> obsticle.tree Then
 
                             obj.DogPos.y += -1
                             allowed = True
 
                         End If
-
                     End If
 
                 Case "a"
 
                     If obj.DogPos.x > 0 Then
-
                         If obj.map(obj.DogPos.y, obj.DogPos.x - 1) <> obsticle.tree Then
 
                             obj.DogPos.x += -1
                             allowed = True
 
                         End If
-
                     End If
 
                 Case "s"
 
                     If obj.DogPos.y < height Then
-
                         If obj.map(obj.DogPos.y + 1, obj.DogPos.x) <> obsticle.tree Then
 
                             obj.DogPos.y += 1
                             allowed = True
 
                         End If
-
                     End If
 
                 Case "d"
 
                     If obj.DogPos.x < width Then
-
                         If obj.map(obj.DogPos.y, obj.DogPos.x + 1) <> obsticle.tree Then
 
                             obj.DogPos.x += 1
                             allowed = True
 
                         End If
-
                     End If
 
             End Select
@@ -319,52 +255,35 @@
 
         Loop Until allowed
 
-        If obj.DogPos = obj.house Then
-
-            gameState = state.won
-
-        End If
+        If obj.DogPos = obj.house Then gameState = state.won
 
     End Sub
 
     Sub UpdateCatchPos(ByRef obj As Objects, ByVal finish As Vec2, ByRef gameState As Byte)
 
         If obj.CatchPos = finish And obj.CatchPos <> obj.DogPos Then
-
             UpdateCatchPos(obj, obj.house, gameState)
             Exit Sub
-
         End If
 
         If obj.CatchPos = obj.DogPos And gameState <> state.won Then
-
             gameState = state.lost
             Exit Sub
-
         End If
 
         Dim oldPos As Vec2 = obj.CatchPos
-
         Dim grid(height, width) As Nodes
 
         For i = 0 To height
-
             For l = 0 To width
-
                 grid(i, l) = New Nodes(New Vec2(l, i))
-
             Next
-
         Next
 
         For i = 0 To height
-
             For l = 0 To width
-
                 grid(l, i).addNeighbors(grid, obj.map)
-
             Next
-
         Next
 
         Dim openSet As New List(Of Nodes)
@@ -668,15 +587,11 @@
     End Sub
 
     Function heuristic(ByVal pos1 As Vec2, ByVal pos2 As Vec2) As Integer
-
-        Return Math.Sqrt(Math.Abs(pos1.x - pos2.x) + Math.Abs(pos1.y - pos2.y))
-
+        Return ((pos1.x - pos2.x) ^ 2) + ((pos1.y - pos2.y) ^ 2)
     End Function
 
     Function visualDist(ByVal pos1 As Vec2, ByVal pos2 As Vec2) As Single
-
-        Return ((pos1.x - pos2.x) ^ 2) + ((pos1.y - pos2.y) ^ 2)
-
+        Return Math.Sqrt(Math.Abs(pos1.x - pos2.x) + Math.Abs(pos1.y - pos2.y))
     End Function
 
 End Module
