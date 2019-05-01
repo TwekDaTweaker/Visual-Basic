@@ -78,8 +78,14 @@
         'pathfinding using A* algorithm
         Dim path As List(Of Vec2) = AStar(map, width, height, start, finish)
 
-        'end animation
-        Draw(start, ConsoleColor.Green)
+            For i = 1 To path.Count - 1
+                Draw(path(i), ConsoleColor.Green)
+                Draw(path(i - 1), ConsoleColor.DarkBlue)
+                Threading.Thread.Sleep(4)
+            Next
+
+            'end animation
+            Draw(start, ConsoleColor.Green)
         path.Reverse()
         For Each point In path
             Draw(point, ConsoleColor.Green)
@@ -183,7 +189,7 @@
     End Function
 
     Function visualDist(ByVal pos1 As Vec2, ByVal pos2 As Vec2) As Single
-        Return Math.Sqrt(Math.Abs(pos1.x - pos2.x) + Math.Abs(pos1.y - pos2.y))
+        Return Math.Sqrt(Math.Abs(pos1.x - pos2.x) ^ 2 + Math.Abs(pos1.y - pos2.y) ^ 2)
     End Function
 
     Function AStar(ByVal map(,) As Boolean, ByVal width As Integer, ByVal height As Integer,
@@ -280,8 +286,8 @@
 
                     'sets new heuristscs
                     neighbor.g = tempG
-                    neighbor.h = heuristic(neighbor.pos, finish)
-                    neighbor.vh = visualDist(neighbor.pos, finish)
+                    neighbor.vh = heuristic(neighbor.pos, finish)
+                    neighbor.h = visualDist(neighbor.pos, finish)
                     neighbor.f = neighbor.h + neighbor.g
                     neighbor.prev = current
 
