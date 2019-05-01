@@ -2,8 +2,8 @@
 
     Sub Main()
 
-        Console.WindowHeight = 30
-        Console.WindowWidth = 30 * 2
+        Console.WindowHeight = 40
+        Console.WindowWidth = 50 * 2
 
         Dim isAlive As Boolean = True
         Dim ft As New FrameTimer
@@ -14,6 +14,7 @@
         Dim elapsedTime As Decimal
         Dim snek As New List(Of Vec2)
         Dim super As Boolean = False
+        Dim feed As Boolean = False
 
         Randomize()
         Dim rand As New Random
@@ -25,10 +26,10 @@
 
         While True
             While (isAlive)
-            dt = ft.Mark
+                dt = ft.Mark
 
-            'Gets velocity
-            If Console.KeyAvailable = True Then
+                'Gets velocity
+                If Console.KeyAvailable = True Then
                 Dim key = Console.ReadKey(True)
                     If key.Key = ConsoleKey.Escape Then
                         Console.SetCursorPosition(Console.WindowWidth / 2 - 2, Console.WindowHeight / 2 - 1)
@@ -36,6 +37,9 @@
                         key = Console.ReadKey(True)
                         Console.SetCursorPosition(Console.WindowWidth / 2 - 2, Console.WindowHeight / 2 - 1)
                         Console.Write("     ")
+                        For Each part In snek
+                            Draw(part, ConsoleColor.White)
+                        Next
                     End If
                     Select Case LCase(key.KeyChar())
                         Case "w"
@@ -50,33 +54,46 @@
                         Case "d"
                             vel.x = +1
                             vel.y = 0
+                        Case "i"
+                            If feed Then
+                                feed = False
+                            Else
+                                feed = True
+                            End If
                     End Select
                 End If
-            If oldvel + vel = New Vec2(0, 0) Then vel = oldvel
+                If oldvel + vel = New Vec2(0, 0) Then vel = oldvel
 
                 If elapsedTime > (1 / (speed + (snek.Count / 10))) Then
                     'Updates the snake's position
-                    Draw(snek(snek.Count - 1), ConsoleColor.Black)
+                    If Not snek(snek.Count - 1) = snek(snek.Count - 2) Then
+                        Draw(snek(snek.Count - 1), ConsoleColor.Black)
+                    End If
                     For i = snek.Count - 1 To 1 Step -1
-                        snek(i) = snek(i - 1)
-                    Next
-                    snek(0) += vel
+                            snek(i) = snek(i - 1)
+                        Next
+                        snek(0) += vel
                     oldvel = New Vec2(vel)
 
                     'Cheks if the food is eaten
                     If snek(0) = food Then
                         If super Then
-                            snek.Add(snek(snek.Count - 1))
-                            snek.Add(snek(snek.Count - 1))
-                            snek.Add(snek(snek.Count - 1))
-                            snek.Add(snek(snek.Count - 1))
+                            For i = 1 To 4
+                                snek.Add(snek(snek.Count - 1))
+                            Next
                         End If
                         snek.Add(snek(snek.Count - 1))
-                        super = False
+assignFood:
                         food.x = rand.Next(0, Console.WindowWidth / 2 - 1)
                         food.y = rand.Next(0, Console.WindowHeight)
+                        For i = 0 To snek.Count - 1
+                            If food = snek(i) Then GoTo assignFood
+                        Next
+                        super = False
                         If rand.Next(1, 8) = 1 Then super = True
                     End If
+
+                    If feed Then snek.Add(snek(snek.Count - 1))
 
                     'Check if the snake died
                     For i = 1 To snek.Count - 1
@@ -91,9 +108,7 @@
                     End If
 
                     'Draws snake and food
-                    For Each part In snek
-                        Draw(part, ConsoleColor.White)
-                    Next
+                    Draw(snek(0), ConsoleColor.White)
                     If super Then
                         Draw(food, ConsoleColor.Yellow)
                     Else
@@ -117,6 +132,7 @@
             food.y = rand.Next(0, Console.WindowHeight)
             vel = New Vec2(1, 0)
             oldvel = New Vec2(vel)
+            feed = False
             isAlive = True
 
         End While
