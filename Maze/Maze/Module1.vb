@@ -1,96 +1,94 @@
 ﻿Module Module1
 
+
+    Const speedMazeSoft As Integer = 4
+    Const speedMazeHard As Integer = 2
+    Const speedWallDestroy As Integer = 10
+    Const speedAStar As Integer = 15
+    Const speedBacktrack As Integer = 9
+    Const speedFinalParth As Integer = 15
+
     Sub Main()
 
         While True
 
             Randomize()
-            Dim width As Integer = 41
-        Dim height As Integer = 41
-        Console.SetWindowSize(width * 2, height)
-        Dim map(height, width) As Boolean
-        Dim pos As New Vec2()
-        Dim trail As New List(Of Vec2)
-        Dim done As Boolean = False
-        Dim ft As New FrameTimer
-        Dim dt As Decimal = ft.Mark()
+            Const width As Integer = 51
+            Const height As Integer = 51
+            Console.SetWindowSize(width * 2, height)
+            Dim map(height, width) As Boolean
+            Dim pos As New Vec2()
+            Dim trail As New List(Of Vec2)
+            Dim done As Boolean = False
+            Dim ft As New FrameTimer
+            Dim dt As Decimal = ft.Mark()
 
-        'calculating start position
-        Dim rand As New Random()
-        Dim start As New Vec2(1, rand.Next(1, height))
-        While start.y Mod 2 = 0
-            start.y = rand.Next(0, height)
-        End While
+            'calculating start position
+            Dim rand As New Random()
+            Dim start As New Vec2(1, rand.Next(1, height))
+            While start.y Mod 2 = 0
+                start.y = rand.Next(0, height)
+            End While
 
-        'true means no wall
-        map(start.y, start.x) = True
-        map(start.y, start.x - 1) = True
-        For j = 0 To height - 1
-            For i = 0 To width - 1
-                Draw(New Vec2(j, i), ConsoleColor.White)
+            'true means no wall
+            map(start.y, start.x) = True
+            map(start.y, start.x - 1) = True
+            For j = 0 To height - 1
+                For i = 0 To width - 1
+                    Draw(New Vec2(j, i), ConsoleColor.White)
+                Next
             Next
-        Next
-        Draw(start, ConsoleColor.Gray)
-        Draw(New Vec2(start.x - 1, start.y), ConsoleColor.Gray)
+            Draw(start, ConsoleColor.Gray)
+            Draw(New Vec2(start.x - 1, start.y), ConsoleColor.Gray)
 
-        'calling recursive function to create a maze
-        maze(map, start, width, height)
+            'calling recursive function to create a maze
+            maze(map, start, width, height)
 
-        'finding a suitable position for the end of the maze
-        Dim finish As New Vec2(width - 1, rand.Next(1, height))
-        While finish.y Mod 2 = 0 And Not map(finish.y, finish.x - 1)
-            finish.y = rand.Next(1, height)
-        End While
-        map(finish.y, finish.x) = True
-        start = New Vec2(start.x - 1, start.y)
+            'finding a suitable position for the end of the maze
+            Dim finish As New Vec2(width - 1, rand.Next(1, height))
+            While finish.y Mod 2 = 0 And Not map(finish.y, finish.x - 1)
+                finish.y = rand.Next(1, height)
+            End While
+            map(finish.y, finish.x) = True
+            start = New Vec2(start.x - 1, start.y)
 
-        'destroying walls to make the maze more treversable
-        Dim walls As New List(Of Vec2)
-        For j = 1 To width - 2
-            For i = 1 To height - 2
-                Dim U = Not map(j - 1, i)
-                Dim D = Not map(j + 1, i)
-                Dim R = Not map(j, i + 1)
-                Dim L = Not map(j, i - 1)
-                If Not map(j, i) And ((U And D And Not (L Or R)) Or (Not (U Or D) And L And R)) Then    ' ? ? | ?#?
-                    If rand.Next(0, 101) <= 7 Then                                                      ' #0# |  0
-                        walls.Add(New Vec2(i, j))                                                       ' ? ? | ?#?
-                        map(j, i) = True
-                        Draw(walls(walls.Count - 1), ConsoleColor.DarkGray)
-                        Threading.Thread.Sleep(10)
+            'destroying walls to make the maze more treversable
+            Dim walls As New List(Of Vec2)
+            For j = 1 To width - 2
+                For i = 1 To height - 2
+                    Dim U = Not map(j - 1, i)
+                    Dim D = Not map(j + 1, i)
+                    Dim R = Not map(j, i + 1)
+                    Dim L = Not map(j, i - 1)
+                    If Not map(j, i) And ((U And D And Not (L Or R)) Or (Not (U Or D) And L And R)) Then    ' ? ? | ?#?
+                        If rand.Next(0, 101) <= 6 Then                                                      ' #0# |  0
+                            walls.Add(New Vec2(i, j))                                                       ' ? ? | ?#?
+                            map(j, i) = True
+                            Draw(walls(walls.Count - 1), ConsoleColor.DarkGray)
+                            Threading.Thread.Sleep(speedWallDestroy)
+                        End If
                     End If
-                End If
+                Next
             Next
-        Next
 
-        'For j = 0 To height - 1
-        '    For o = 0 To width - 1
-        '        If Not map(j, o) Then
-        '            Draw(New Vec2(o, j), ConsoleColor.White)
-        '        Else
-        '            Draw(New Vec2(o, j), ConsoleColor.Black)
-        '        End If
-        '    Next
-        'Next
+            Draw(finish, ConsoleColor.DarkGray)
 
-        Draw(finish, ConsoleColor.DarkGray)
-
-        'pathfinding using A* algorithm
-        Dim path As List(Of Vec2) = AStar(map, width, height, start, finish)
+            'pathfinding using A* algorithm
+            Dim path As List(Of Vec2) = AStar(map, width, height, start, finish)
 
             For i = 1 To path.Count - 1
                 Draw(path(i), ConsoleColor.Green)
+                Threading.Thread.Sleep(speedBacktrack)
                 Draw(path(i - 1), ConsoleColor.DarkBlue)
-                Threading.Thread.Sleep(4)
             Next
 
             'end animation
             Draw(start, ConsoleColor.Green)
-        path.Reverse()
-        For Each point In path
-            Draw(point, ConsoleColor.Green)
-            Threading.Thread.Sleep(15)
-        Next
+            path.Reverse()
+            For Each point In path
+                Draw(point, ConsoleColor.Green)
+                Threading.Thread.Sleep(speedFinalParth)
+            Next
 
             Threading.Thread.Sleep(1500)
 
@@ -107,12 +105,13 @@
         Dim x As Integer
         Dim temp As Vec2
         Dim rand As New Random()
+        Randomize()
         For i = 0 To 3
-            x = rand.Next(0, randDirections.Length)
+            x = CInt(Math.Ceiling(Rnd() * (randDirections.Length - 1)))
             temp = New Vec2(randDirections(x))
             randDirections(x) = New Vec2(randDirections(i))
             randDirections(i) = temp
-            Threading.Thread.Sleep(7)
+            Threading.Thread.Sleep(speedMazeSoft)
         Next
 
         For i = 0 To randDirections.Length - 1
@@ -172,7 +171,7 @@
             End Select
         Next
 
-        Threading.Thread.Sleep(5)
+        Threading.Thread.Sleep(speedMazeHard)
 
     End Sub
 
@@ -295,7 +294,7 @@
 
             Next
 
-            Threading.Thread.Sleep(30)
+            Threading.Thread.Sleep(speedAStar)
 
         End While
 
