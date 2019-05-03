@@ -1,20 +1,19 @@
 ﻿Module Module1
 
-
-    Const speedMazeSoft As Integer = 4
-    Const speedMazeHard As Integer = 2
-    Const speedWallDestroy As Integer = 10
-    Const speedAStar As Integer = 15
-    Const speedBacktrack As Integer = 9
-    Const speedFinalParth As Integer = 15
+    Const speedMazeSoft As Integer = 2
+    Const speedMazeHard As Integer = 1
+    Const speedWallDestroy As Integer = 4
+    Const speedAStar As Integer = 5
+    Const speedBacktrack As Integer = 7
+    Const speedFinalParth As Integer = 10
 
     Sub Main()
 
         While True
 
             Randomize()
-            Const width As Integer = 51
-            Const height As Integer = 51
+            Const width As Integer = 101
+            Const height As Integer = 61
             Console.SetWindowSize(width * 2, height)
             Dim map(height, width) As Boolean
             Dim pos As New Vec2()
@@ -22,47 +21,55 @@
             Dim done As Boolean = False
             Dim ft As New FrameTimer
             Dim dt As Decimal = ft.Mark()
-
-            'calculating start position
-            Dim rand As New Random()
-            Dim start As New Vec2(1, rand.Next(1, height))
-            While start.y Mod 2 = 0
-                start.y = rand.Next(0, height)
-            End While
+            Dim rand As New Random
 
             'true means no wall
-            map(start.y, start.x) = True
-            map(start.y, start.x - 1) = True
+            'draws the white background
             For j = 0 To height - 1
                 For i = 0 To width - 1
-                    Draw(New Vec2(j, i), ConsoleColor.White)
+                    Draw(New Vec2(i, j), ConsoleColor.White)
                 Next
             Next
-            Draw(start, ConsoleColor.Gray)
-            Draw(New Vec2(start.x - 1, start.y), ConsoleColor.Gray)
+            Draw(New Vec2(0, 0), ConsoleColor.White)
+
+            'making random position for the maze generator to start
+            Dim beginning As New Vec2(rand.Next(1, width - 1), rand.Next(1, height - 1))
+            While beginning.x Mod 2 = 0 Or beginning.y Mod 2 = 0
+                beginning = New Vec2(rand.Next(1, width - 1), rand.Next(1, height - 1))
+            End While
 
             'calling recursive function to create a maze
-            maze(map, start, width, height)
+            maze(map, beginning, width, height)
 
-            'finding a suitable position for the end of the maze
-            Dim finish As New Vec2(width - 1, rand.Next(1, height))
+            'finding a suitable position for the start and end of the maze
+            Dim finish As New Vec2(width - 1, rand.Next(1, height - 1))
             While finish.y Mod 2 = 0 And Not map(finish.y, finish.x - 1)
-                finish.y = rand.Next(1, height)
+                finish.y = rand.Next(1, height - 1)
             End While
             map(finish.y, finish.x) = True
-            start = New Vec2(start.x - 1, start.y)
+            Dim start As New Vec2(0, rand.Next(1, height - 1))
+            While start.y Mod 2 = 0 And Not map(start.y, start.x + 1)
+                start.y = rand.Next(1, height - 1)
+            End While
+            map(start.y, start.x) = True
+            Draw(start, ConsoleColor.Gray)
 
             'destroying walls to make the maze more treversable
             Dim walls As New List(Of Vec2)
-            For j = 1 To width - 2
-                For i = 1 To height - 2
-                    Dim U = Not map(j - 1, i)
-                    Dim D = Not map(j + 1, i)
-                    Dim R = Not map(j, i + 1)
-                    Dim L = Not map(j, i - 1)
-                    If Not map(j, i) And ((U And D And Not (L Or R)) Or (Not (U Or D) And L And R)) Then    ' ? ? | ?#?
-                        If rand.Next(0, 101) <= 6 Then                                                      ' #0# |  0
-                            walls.Add(New Vec2(i, j))                                                       ' ? ? | ?#?
+            For j = 2 To height - 3
+                For i = 2 To width - 3
+                    'true means wall
+                    Dim u = Not map(j - 1, i)
+                    Dim uu = Not map(j - 2, i)
+                    Dim d = Not map(j + 1, i)
+                    Dim dd = Not map(j + 2, i)
+                    Dim r = Not map(j, i + 1)
+                    Dim rr = Not map(j, i + 2)
+                    Dim l = Not map(j, i - 1)
+                    Dim ll = Not map(j, i - 2)
+                    If Not map(j, i) And ((u And d And uu And dd And Not (l Or r)) Or (Not (u Or d) And l And ll And rr And r)) Then
+                        If rand.Next(0, 101) <= 4 Then
+                            walls.Add(New Vec2(i, j))
                             map(j, i) = True
                             Draw(walls(walls.Count - 1), ConsoleColor.DarkGray)
                             Threading.Thread.Sleep(speedWallDestroy)
@@ -76,11 +83,11 @@
             'pathfinding using A* algorithm
             Dim path As List(Of Vec2) = AStar(map, width, height, start, finish)
 
-            For i = 1 To path.Count - 1
-                Draw(path(i), ConsoleColor.Green)
-                Threading.Thread.Sleep(speedBacktrack)
-                Draw(path(i - 1), ConsoleColor.DarkBlue)
-            Next
+            'For i = 1 To path.Count - 1
+            '    Draw(path(i), ConsoleColor.Green)
+            '    Threading.Thread.Sleep(speedBacktrack)
+            '    Draw(path(i - 1), ConsoleColor.DarkBlue)
+            'Next
 
             'end animation
             Draw(start, ConsoleColor.Green)
@@ -104,15 +111,13 @@
         randDirections(3) = New Vec2(-1, 0)
         Dim x As Integer
         Dim temp As Vec2
-        Dim rand As New Random()
-        Randomize()
         For i = 0 To 3
             x = CInt(Math.Ceiling(Rnd() * (randDirections.Length - 1)))
             temp = New Vec2(randDirections(x))
             randDirections(x) = New Vec2(randDirections(i))
             randDirections(i) = temp
-            Threading.Thread.Sleep(speedMazeSoft)
         Next
+        Threading.Thread.Sleep(speedMazeSoft)
 
         For i = 0 To randDirections.Length - 1
             Select Case randDirections(i)
@@ -130,7 +135,7 @@
                         Continue For
                     End If
                 Case New Vec2(0, 1) 'DOWN
-                    If pos.y + 2 >= width Then Continue For
+                    If pos.y + 2 >= height Then Continue For
                     If Not map(pos.y + 2, pos.x) Then
                         map(pos.y + 2, pos.x) = True
                         map(pos.y + 1, pos.x) = True
@@ -203,7 +208,7 @@
         Next
         For i = 0 To height
             For l = 0 To width
-                grid(l, i).addNeighbors(grid, map, height, width)
+                grid(i, l).addNeighbors(grid, map, height, width)
             Next
         Next
 
