@@ -1,19 +1,19 @@
 ﻿Module Module1
 
-    Const speedMazeSoft As Integer = 2
-    Const speedMazeHard As Integer = 1
-    Const speedWallDestroy As Integer = 4
-    Const speedAStar As Integer = 5
-    Const speedBacktrack As Integer = 7
-    Const speedFinalParth As Integer = 10
+    Const speedMazeSoft As Integer = 0
+    Const speedMazeHard As Integer = 0
+    Const speedWallDestroy As Integer = 0
+    Const speedAStar As Integer = 0
+    Const speedBacktrack As Integer = 0
+    Const speedFinalParth As Integer = 0
 
     Sub Main()
 
         While True
 
             Randomize()
-            Const width As Integer = 101
-            Const height As Integer = 61
+            Const width As Integer = 51
+            Const height As Integer = 51
             Console.SetWindowSize(width * 2, height)
             Dim map(height, width) As Boolean
             Dim pos As New Vec2()
