@@ -205,6 +205,8 @@ Module Module1
             Score += 20
         ElseIf Len(Word) > 5 Then
             Score += 5
+        ElseIf Len(Word) < 4 Then
+            Score -= 1
         End If
         Return Score
     End Function
